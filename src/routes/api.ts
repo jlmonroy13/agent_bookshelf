@@ -56,6 +56,44 @@ router.delete('/books/:id', (req: Request, res: Response) => {
   res.status(204).send();
 });
 
+router.post('/books/:id/read', (req: Request, res: Response) => {
+  const bookId = parseInt(req.params.id as string, 10);
+  const { userId } = req.body ?? {};
+
+  if (Number.isNaN(bookId)) {
+    return res.status(400).json({ error: 'Invalid book id' });
+  }
+
+  if (userId === undefined || userId === null || userId === '') {
+    return res.status(400).json({ error: 'userId is required' });
+  }
+
+  const parsedUserId = typeof userId === 'number' ? userId : parseInt(String(userId), 10);
+  if (Number.isNaN(parsedUserId)) {
+    return res.status(400).json({ error: 'userId must be a number' });
+  }
+
+  const result = Shelf.markBookAsRead(parsedUserId, bookId);
+
+  if (!result.success) {
+    if (result.error === 'user_not_found') {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    if (result.error === 'book_not_found') {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    return res.status(500).json({ error: 'Read shelf not found for user' });
+  }
+
+  const status = result.alreadyRead ? 200 : 201;
+  res.status(status).json({
+    message: result.alreadyRead ? 'Book already marked as read' : 'Book marked as read',
+    userId: parsedUserId,
+    bookId,
+    shelfId: result.shelfId,
+  });
+});
+
 // Users API
 router.get('/users', (req: Request, res: Response) => {
   const users = User.getAllUsers();

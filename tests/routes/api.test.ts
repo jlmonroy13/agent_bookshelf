@@ -85,6 +85,55 @@ describe('API Routes', () => {
     });
   });
 
+  describe('POST /api/books/:id/read', () => {
+    it('marks a book as read on the user read shelf', async () => {
+      const res = await request(app)
+        .post('/api/books/31/read')
+        .send({ userId: 1 });
+
+      expect(res.status).toBe(201);
+      expect(res.body.message).toBe('Book marked as read');
+      expect(res.body.shelfId).toBe(3);
+      expect(res.body.bookId).toBe(31);
+
+      const shelf = await request(app).get('/api/shelves/3');
+      expect(shelf.body.books.some((b: { book_id: number }) => b.book_id === 31)).toBe(true);
+    });
+
+    it('is idempotent when the book is already on the read shelf', async () => {
+      const res = await request(app)
+        .post('/api/books/1/read')
+        .send({ userId: 1 });
+
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe('Book already marked as read');
+    });
+
+    it('requires userId', async () => {
+      const res = await request(app).post('/api/books/5/read').send({});
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('userId is required');
+    });
+
+    it('returns 404 for missing book', async () => {
+      const res = await request(app)
+        .post('/api/books/999/read')
+        .send({ userId: 1 });
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('Book not found');
+    });
+
+    it('returns 404 for missing user', async () => {
+      const res = await request(app)
+        .post('/api/books/5/read')
+        .send({ userId: 999 });
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('User not found');
+    });
+  });
+
   // TODO: Add tests for other API endpoints
   // TODO: Add tests for error handling
   // TODO: Add tests for edge cases
