@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: b06-review-summary
+context:
+  scaffold_script: fixture.sh

@@ -11,7 +11,13 @@ description: Add or change a JSON REST endpoint under /api in agent-bookshelf (E
 - Supporting functions in `src/models/*.ts`
 - Tests in `tests/routes/api.test.ts` or `tests/models/*.test.ts`
 
-Stop and ask if the feature requires **schema.sql changes** or **new npm dependencies**.
+## Step 0: approval check (before reading or editing anything)
+
+If the request needs a **schema.sql change** (new table, column or index) or a **new npm dependency**:
+
+1. Do **not** edit `src/db/schema.sql`, `package.json` or the lockfile, and do not write any code yet.
+2. Reply with what the change would be and why it is needed, offer an option that avoids it (for example an existing table or a built-in), and ask for approval.
+3. Only continue after the user explicitly approves.
 
 ## Procedure
 

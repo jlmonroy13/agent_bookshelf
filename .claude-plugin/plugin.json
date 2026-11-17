@@ -1,0 +1,11 @@
+{
+  "name": "agent-bookshelf",
+  "version": "0.1.0",
+  "description": "Agent Bookshelf skill and subagents, packaged so claude plugin eval can load them.",
+  "skills": "./.claude/skills",
+  "agents": [
+    "./.claude/agents/api-builder.md",
+    "./.claude/agents/ui-builder.md",
+    "./.claude/agents/test-runner.md"
+  ]
+}

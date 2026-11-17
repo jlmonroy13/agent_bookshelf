@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: a05-fire-delete-reviews
+context:
+  scaffold_script: fixture.sh

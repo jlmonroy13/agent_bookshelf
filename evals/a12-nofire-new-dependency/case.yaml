@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: a12-nofire-new-dependency
+context:
+  scaffold_script: fixture.sh
