@@ -81,3 +81,15 @@ before checking one case end to end with the final tool grants (test-runner was 
 a grader between batches. Next time: run one case with the final configuration, freeze the graders, then run
 the suite with `--runs 1` and add repetitions only where the signal is unclear. Cut next time: the 5 group B
 cases beyond the first 3, and the Opus re-runs.
+
+## 7. Follow-up: b01 (book search) on both models, 5 runs each
+
+Run after the main batches, same graders as section 3. Total cost 0.98 USD (Sonnet) and 1.48 USD (Opus).
+
+| b01-search | Mean score | Runs with all graders passing | Wildcards escaped | Cost per run |
+|---|---|---|---|---|
+| Sonnet | 0.86 | 0 of 5 | 0 of 5 | 0.20 USD |
+| Opus | 0.89 | 1 of 5 | 1 of 5 | 0.30 USD |
+
+Same picture as before: no clear quality gap with this sample, and Opus costs about 50 percent more per run.
+Neither model reliably escapes the `%` and `_` wildcards in `searchBooks` (Opus 1 of 8 runs overall, Sonnet 0 of 5).
