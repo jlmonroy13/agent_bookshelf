@@ -1,0 +1,254 @@
+<title>Week 3 Demo Script</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one column of cue cards, one per minute, under a sticky timer */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --fg: #1b2230; --muted: #5a6577; --line: #dde2ea;
+  --accent: #1f6feb; --accent-soft: #e6efff;
+  --opus: #8a5a00; --sonnet: #0a7a52;
+  --warn: #b42318; --warn-soft: #fdeceb; --code-bg: #eef1f5;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --surface: #181e27; --fg: #e6eaf0; --muted: #9aa5b5; --line: #2a3340;
+    --accent: #6ea8ff; --accent-soft: #1a2a44; --opus: #f0b44c; --sonnet: #4fd1a1;
+    --warn: #ff8a80; --warn-soft: #3a1a18; --code-bg: #0e1218; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #181e27; --fg: #e6eaf0; --muted: #9aa5b5; --line: #2a3340;
+  --accent: #6ea8ff; --accent-soft: #1a2a44; --opus: #f0b44c; --sonnet: #4fd1a1;
+  --warn: #ff8a80; --warn-soft: #3a1a18; --code-bg: #0e1218; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 18px; line-height: 1.55; margin: 0; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.wrap { max-width: 820px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: 2rem; } h2 { font-size: 1.35rem; }
+h3 { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+p { margin: 0; }
+code { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+.timer { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.timer-inner { max-width: 820px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.clock { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 4.5ch; }
+.clock.over { color: var(--warn); }
+.now { color: var(--muted); font-size: 0.95rem; flex: 1; min-width: 0; }
+.now b { color: var(--fg); }
+button { font: inherit; font-size: 0.9rem; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 6px 12px; border-radius: 6px; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 700; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.bar { height: 4px; background: var(--line); }
+.bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.3s linear; }
+.bar.over span { background: var(--warn); }
+header.top { padding-block: 28px 8px; display: grid; gap: 8px; }
+header.top .sub { color: var(--muted); }
+.thesis { margin-top: 20px; padding: 18px 20px; border-radius: 10px; background: var(--accent-soft); display: grid; gap: 6px; }
+.thesis p { font-size: 1.2rem; font-weight: 700; }
+.numbers { margin-top: 20px; overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.o { color: var(--opus); font-weight: 700; } .s { color: var(--sonnet); font-weight: 700; }
+.segments { margin-top: 32px; display: grid; gap: 20px; }
+.seg { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.seg.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.seg-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.time { font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.say { display: grid; gap: 10px; }
+.say p { font-size: 1.15rem; padding-left: 14px; border-left: 3px solid var(--accent); }
+.say p.key { font-weight: 700; }
+.show { display: grid; gap: 6px; }
+.show ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.cmd { display: flex; gap: 8px; background: var(--code-bg); border-radius: 8px; padding: 8px 8px 8px 12px; }
+.cmd pre { margin: 0; flex: 1; min-width: 0; overflow-x: auto; font-family: var(--font-mono); font-size: 0.85rem; align-self: center; }
+.cmd button { font-size: 0.8rem; padding: 4px 10px; flex-shrink: 0; }
+.cmds { display: grid; gap: 8px; }
+.callout { padding: 12px 14px; border-radius: 8px; background: var(--warn-soft); font-size: 0.95rem; }
+.callout b { color: var(--warn); }
+section.block { margin-top: 40px; display: grid; gap: 14px; }
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.checklist label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.checklist input { width: 20px; height: 20px; margin-top: 3px; flex-shrink: 0; accent-color: var(--accent); }
+.checklist input:checked + span { color: var(--muted); text-decoration: line-through; }
+.qa { display: grid; gap: 12px; }
+.qa div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.qa b { font-size: 1rem; }
+@media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
+</style>
+
+<div class="timer">
+  <div class="timer-inner">
+    <div class="clock" id="clock" aria-live="off">0:00</div>
+    <div class="now" id="now">Press Start when you begin speaking.</div>
+    <button class="primary" id="start" type="button">Start</button>
+    <button id="reset" type="button">Reset</button>
+  </div>
+  <div class="bar" id="bar"><span id="barfill"></span></div>
+</div>
+
+<div class="wrap">
+  <header class="top">
+    <h3>Office hours 3 · 5 minutes · live</h3>
+    <h1>Did the cheaper orchestrator keep its quality?</h1>
+    <p class="sub">Week 2 cut the cost. Week 3 asks for evidence that quality survived, and I also measure what the eval itself cost.</p>
+  </header>
+
+  <div class="thesis">
+    <p>Sonnet as orchestrator matched Opus on the cases I could compare, for about a third less per run. The eval also found a real gap in my skill.</p>
+  </div>
+
+  <div class="numbers">
+    <table>
+      <thead><tr><th>Orchestrator (b04-b06, 9 runs each)</th><th>Mean score</th><th>All graders pass</th><th>Cost per run</th></tr></thead>
+      <tbody>
+        <tr><td class="s">Sonnet</td><td>0.98</td><td>89%</td><td>0.19 USD</td></tr>
+        <tr><td class="o">Opus</td><td>0.97</td><td>78%</td><td>0.29 USD</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="segments" id="segments">
+
+    <article class="seg" data-start="0" data-end="45">
+      <div class="seg-head"><span class="time">0:00 - 0:45</span><h2>The open question</h2></div>
+      <div class="say">
+        <p class="key">Last week I moved my orchestrator from Opus to Sonnet and the bill dropped.</p>
+        <p>But the only evidence that quality held was me reading two reports. That is "it looks fine".</p>
+        <p>This week I replaced that with an eval: 22 cases, graded by code, run three times each.</p>
+      </div>
+      <div class="show"><h3>Show</h3><ul><li>Terminal in the repo, branch <code>week3-evals</code></li></ul></div>
+      <div class="cmds"><div class="cmd"><pre>git log --oneline -1 &amp;&amp; ls evals | head -24</pre><button type="button" data-copy>Copy</button></div></div>
+    </article>
+
+    <article class="seg" data-start="45" data-end="105">
+      <div class="seg-head"><span class="time">0:45 - 1:45</span><h2>The eval set, in both directions</h2></div>
+      <div class="say">
+        <p class="key">Twelve cases test my <code>add-endpoint</code> skill: six where it should fire, six where it should stay out.</p>
+        <p>"Add an endpoint" must ask. "Rename a variable" and "explain this route" must not edit anything. A schema change must stop and ask.</p>
+        <p>Ten more run the week 2 flow: coordinator, two builders in parallel, then the tester. Graders are code: regex on the files, tool calls, no edits to schema or package.json.</p>
+      </div>
+      <div class="show"><h3>Show</h3><ul><li>One case folder: prompt, graders, fixture</li><li>The HTML report of the skill run</li></ul></div>
+      <div class="cmds">
+        <div class="cmd"><pre>ls evals/a11-nofire-schema-change evals/a11-nofire-schema-change/graders</pre><button type="button" data-copy>Copy</button></div>
+        <div class="cmd"><pre>open evals/results/a-sonnet/report.html</pre><button type="button" data-copy>Copy</button></div>
+      </div>
+    </article>
+
+    <article class="seg" data-start="105" data-end="180">
+      <div class="seg-head"><span class="time">1:45 - 3:00</span><h2>The week 2 re-run</h2></div>
+      <div class="say">
+        <p class="key">Same suite, same graders, only the orchestrator model changes.</p>
+        <p>On the three cases that finished for both models, Sonnet scored 0.98 and Opus 0.97, and Sonnet cost 0.19 USD per run against 0.29 USD.</p>
+        <p class="key">With nine runs per side I cannot claim a winner. I can say the saving held on this sample.</p>
+        <p>One surprise: in the search case Opus did not escape the percent and underscore wildcards in three of three runs. It reported the bug in week 2 but never fixed it.</p>
+      </div>
+      <div class="show"><h3>Show</h3><ul><li>The table above</li><li>Per-run costs in the report</li></ul></div>
+      <div class="callout"><b>Be upfront:</b> Sonnet timed out on five group B cases and Opus hit my usage limit after the sixth, so only three cases are complete for both.</div>
+    </article>
+
+    <article class="seg" data-start="180" data-end="240">
+      <div class="seg-head"><span class="time">3:00 - 4:00</span><h2>What the eval caught, and the promotion</h2></div>
+      <div class="say">
+        <p class="key">The skill scored the same with and without it on most cases. The tasks were too easy.</p>
+        <p>But two cases failed in both arms: when I asked for a new column or a new npm package, the agent edited <code>schema.sql</code> and <code>package.json</code> without asking.</p>
+        <p>The rule was already in the skill, in one buried sentence. I promoted it to an explicit Step 0: approval check, before reading or editing anything.</p>
+        <p>The schema case went from 0.33 to 0.56. The dependency case did not move, probably because the skill is about endpoints and never loads for that request. That is a lead, not a conclusion.</p>
+      </div>
+      <div class="show"><h3>Show</h3><ul><li>The diff of the skill</li></ul></div>
+      <div class="cmds"><div class="cmd"><pre>git diff week2-base -- .claude/skills/add-endpoint/SKILL.md</pre><button type="button" data-copy>Copy</button></div></div>
+    </article>
+
+    <article class="seg" data-start="240" data-end="300">
+      <div class="seg-head"><span class="time">4:00 - 5:00</span><h2>What the eval cost me</h2></div>
+      <div class="say">
+        <p class="key">The eval cost about 46 USD at list price. Around 25 USD of that went into batches I threw away.</p>
+        <p>I ran the full suite before checking one case end to end with the final permissions, and my tester agent was blocked. I also changed a grader between batches.</p>
+        <p>Next time: one case with the final setup, freeze the graders, then one run per case, and repeat only where the signal is unclear.</p>
+        <p class="key">An eval is also a spend. Measuring quality has to be designed as carefully as the thing it measures.</p>
+      </div>
+      <div class="show"><h3>Show</h3><ul><li>The decision log at the end of the doc</li></ul></div>
+    </article>
+
+  </div>
+
+  <section class="block">
+    <h2>Before you present</h2>
+    <ul class="checklist">
+      <li><label><input type="checkbox" id="c1"><span>Terminal open in the repo on branch <code>week3-evals</code>, font large.</span></label></li>
+      <li><label><input type="checkbox" id="c2"><span>Report open in a browser tab: <code>evals/results/a-sonnet/report.html</code>.</span></label></li>
+      <li><label><input type="checkbox" id="c3"><span>Google Doc open on the results table and the decision log.</span></label></li>
+      <li><label><input type="checkbox" id="c4"><span>Do not run a new eval live. Every run spends plan usage.</span></label></li>
+      <li><label><input type="checkbox" id="c5"><span>Know the limits by heart: small samples, five Sonnet timeouts, Opus cut off at case 7.</span></label></li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2>Likely questions</h2>
+    <div class="qa">
+      <div><b>Is Sonnet really as good as Opus?</b><p>Not proven. Nine runs per side gives roughly plus or minus 18 points at this scale. I can say there was no visible gap and that Sonnet was cheaper.</p></div>
+      <div><b>Why did the skill add nothing?</b><p>Sonnet already does these tasks without it, so the Δ is near zero. The useful finding is the two guardrail cases that fail either way.</p></div>
+      <div><b>Why trust code graders over a judge?</b><p>They are fast and repeatable. I only used a Haiku judge on four short-answer cases and did not calibrate it against a human.</p></div>
+      <div><b>Did the eval touch your real repo?</b><p>No, git status stayed clean. But in one trace the tester ran commands against the real path and deleted files in /tmp, so the sandbox was not fully sealed.</p></div>
+      <div><b>What would you cut?</b><p>Seven of the ten group B cases and the Opus repeats. Three well-chosen cases gave the same answer for a fraction of the cost.</p></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var TOTAL = 300, t = 0, timer = null;
+  var clock = document.getElementById('clock'), now = document.getElementById('now');
+  var bar = document.getElementById('bar'), fill = document.getElementById('barfill');
+  var segs = Array.prototype.slice.call(document.querySelectorAll('.seg'));
+  function fmt(s) { var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+  function render() {
+    clock.textContent = fmt(t);
+    clock.classList.toggle('over', t > TOTAL);
+    bar.classList.toggle('over', t > TOTAL);
+    fill.style.width = Math.min(100, (t / TOTAL) * 100) + '%';
+    var active = null;
+    segs.forEach(function (s) {
+      var on = t >= +s.dataset.start && t < +s.dataset.end;
+      s.classList.toggle('active', on);
+      if (on) active = s;
+    });
+    if (active) now.innerHTML = '<b>Now:</b> ' + active.querySelector('h2').textContent;
+    else if (t >= TOTAL) now.innerHTML = '<b>Time.</b> Stop and open the Q&amp;A.';
+  }
+  document.getElementById('start').addEventListener('click', function () {
+    if (timer) { clearInterval(timer); timer = null; this.textContent = 'Resume'; return; }
+    this.textContent = 'Pause';
+    timer = setInterval(function () { t += 1; render(); }, 1000);
+    render();
+  });
+  document.getElementById('reset').addEventListener('click', function () {
+    clearInterval(timer); timer = null; t = 0;
+    document.getElementById('start').textContent = 'Start';
+    now.textContent = 'Press Start when you begin speaking.';
+    segs.forEach(function (s) { s.classList.remove('active'); });
+    render();
+  });
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var text = b.parentNode.querySelector('pre').textContent;
+      function done() { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1200); }
+      try { navigator.clipboard.writeText(text).then(done, function () { sel(b); }); } catch (e) { sel(b); }
+    });
+  });
+  function sel(b) {
+    var pre = b.parentNode.querySelector('pre'), r = document.createRange();
+    r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  document.querySelectorAll('.checklist input').forEach(function (c) {
+    try { c.checked = localStorage.getItem(c.id) === '1'; } catch (e) {}
+    c.addEventListener('change', function () { try { localStorage.setItem(c.id, c.checked ? '1' : '0'); } catch (e) {} });
+  });
+  render();
+})();
+</script>
