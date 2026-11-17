@@ -146,10 +146,10 @@ section.block { margin-top: 40px; display: grid; gap: 14px; }
         <p class="key">Same suite, same graders, only the orchestrator model changes.</p>
         <p>On the three cases that finished for both models, Sonnet scored 0.98 and Opus 0.97, and Sonnet cost 0.19 USD per run against 0.29 USD.</p>
         <p class="key">With nine runs per side I cannot claim a winner. I can say the saving held on this sample.</p>
-        <p>One surprise: in the search case Opus did not escape the percent and underscore wildcards in three of three runs. It reported the bug in week 2 but never fixed it.</p>
+        <p>One surprise: in the search case neither model escapes the percent and underscore wildcards reliably. Opus did it in 1 of 8 runs, Sonnet in 0 of 5. In week 2 Opus reported the bug but never fixed it.</p>
       </div>
       <div class="show"><h3>Show</h3><ul><li>The table above</li><li>Per-run costs in the report</li></ul></div>
-      <div class="callout"><b>Be upfront:</b> Sonnet timed out on five group B cases and Opus hit my usage limit after the sixth, so only three cases are complete for both.</div>
+      <div class="callout"><b>Be upfront:</b> Sonnet timed out on five group B cases and Opus hit my usage limit after the sixth, so only four cases are complete for both. The search case got a follow-up of 5 more runs per model: Sonnet 0.86, Opus 0.89, same story.</div>
     </article>
 
     <article class="seg" data-start="180" data-end="240">
