@@ -2,11 +2,7 @@
 name: review-pr
 description: Adversarial review of the current branch's diff by read-only specialist agents (review-security, review-correctness) run in parallel; findings are verified, de-duplicated and returned as JSON {file, line, severity, issue, evidence}. `/review-pr [base]` (default base main). Use when the user asks to review a PR, branch or diff.
 argument-hint: "[base branch, default main]"
-disable-model-invocation: true
-# Cost lever: the orchestrator only collects the diff, dispatches, verifies and merges. On Opus it was
-# 90% of review cost. Sonnet runs this turn; the session model resumes on the next prompt.
-model: sonnet
----
+disable-model-invocation: true---
 
 # /review-pr
 

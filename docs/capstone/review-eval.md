@@ -52,6 +52,17 @@ Brief points: recall 6.0/6 · precision 4.0/4. The coverage gap still appears, u
 (The session was started with `--model sonnet`, but /usage shows the orchestrator still ran on Opus, so these
 are Opus-orchestrator runs.)
 
+## Lever attempt 1: `model: sonnet` in the review-pr skill (runs 7–9)
+
+| Run | Findings | Recall | Precision | Cost |
+|-----|----------|--------|-----------|------|
+| 7 | 4 | 100% | 100% | $0.68 |
+| 8 | 4 | 100% | 100% | $0.58 |
+| 9 | 4 | 100% | 100% | $0.65 |
+
+Quality held; cost went up 8% (mean $0.64 vs $0.59) because the skill switches model mid-session and the
+prompt cache is per model. Reverted.
+
 ## Issue found during the runs (fixed)
 
 Run 2 hit a false alarm from the guardrail's post-Bash integrity check: a command that `cd`-ed into
