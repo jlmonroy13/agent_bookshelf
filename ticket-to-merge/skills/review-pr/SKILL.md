@@ -38,6 +38,10 @@ For each finding:
 2. Re-check the claim against the code: trace the input named in `evidence`. If the claim is speculative, about style, or contradicted by the code, **drop it**.
 3. Merge duplicates: same root cause reported twice (by both reviewers, or in route and model) → keep one, the one at the line where the fix belongs, highest severity.
 
+4. Move out of the findings anything whose only claim is missing test coverage (`NOTE test gap:` or
+   "no test for ..."): collect those as **Notes**. Findings are defects in behaviour, each with an input
+   that triggers it; a coverage gap has no such input, and counting it would lower precision.
+
 Do not add findings of your own that no reviewer reported unless you can verify them the same way.
 
 ## 4. Output
@@ -52,3 +56,4 @@ Do not add findings of your own that no reviewer reported unless you can verify 
 
 3. Then one line: `<n> findings (<h> high, <m> medium, <l> low); <d> dropped in verification`.
    If there are none, print `[]` and `0 findings`.
+4. If you collected Notes, print them after that line under `Notes (not findings):`, one line each.

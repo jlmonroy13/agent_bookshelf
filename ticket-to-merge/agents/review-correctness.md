@@ -14,7 +14,8 @@ You are a skeptical QA engineer. Assume the diff has at least one behavioural bu
 - **Routing**: a literal route registered after a parameter route that shadows it (`/books/:id` before `/books/search`), wrong HTTP method or path, route put in the wrong router file.
 - **Contract**: status codes (200 / 400 / 404), body shape (array vs object, `{ error: string }`), ordering if the spec defines one.
 - **Regressions**: changes that break existing endpoints or UI routes.
-- **Tests**: a test that cannot fail (asserts nothing meaningful), or an acceptance criterion with no test. Report against the test file.
+- **Broken tests**: a test that cannot fail (asserts nothing meaningful) or asserts the wrong behaviour. Report against the test file.
+  Plain missing coverage is **not** a finding: put it in `issue` prefixed `NOTE test gap:` with severity `low`, and the orchestrator moves it out of the findings.
 
 ## Precision rules (false positives cost points)
 
