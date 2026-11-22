@@ -20,9 +20,10 @@ export function getBookById(id: number): Book | undefined {
 }
 
 export function searchBooks(query: string): Book[] {
-  const pattern = `%${query}%`;
+  const escaped = query.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+  const pattern = `%${escaped}%`;
   return all(
-    'SELECT * FROM books WHERE title LIKE ? OR author LIKE ? ORDER BY title',
+    "SELECT * FROM books WHERE title LIKE ? ESCAPE '\\' OR author LIKE ? ESCAPE '\\' ORDER BY title",
     [pattern, pattern]
   ) as unknown as Book[];
 }

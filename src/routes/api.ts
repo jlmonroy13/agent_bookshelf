@@ -12,7 +12,22 @@ router.get('/books', (req: Request, res: Response) => {
   res.json(books);
 });
 
-router.get('/books/:id', (req: Request, res: Response) => {
+router.get('/books/search', (req: Request, res: Response) => {
+  const q = req.query.q;
+  if (q !== undefined && typeof q !== 'string') {
+    return res.status(400).json({ error: 'Query must be a single string' });
+  }
+  const trimmed = (q ?? '').trim();
+  if (trimmed.length > 100) {
+    return res.status(400).json({ error: 'Query must be 100 characters or fewer' });
+  }
+  if (trimmed === '') {
+    return res.json(Book.getAllBooks());
+  }
+  res.json(Book.searchBooks(trimmed));
+});
+
+router.get('/books/:id',(req: Request, res: Response) => {
   const bookId = parseInt(req.params.id as string, 10);
   const book = Book.getBookById(bookId);
 
