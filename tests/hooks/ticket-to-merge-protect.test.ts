@@ -40,6 +40,11 @@ describe('ticket-to-merge protect hook', () => {
       ['implementer runs tests', bash('npm run test:run', implementer)],
       ['test-writer writes a test', write('/repo/tests/routes/search.test.ts', testWriter)],
       ['orchestrator restores tests', bash('git checkout abc123 -- tests/')],
+      // Regressions found in the first /ship-ticket run:
+      ['git rev-parse after a redirect is not "rev"', bash('npm run test:run 2>&1 | tail -3; git rev-parse HEAD')],
+      ['co-author line with <email>', bash('git commit -qm "x\nCo-Authored-By: A <a@b.c>" && git rev-parse HEAD')],
+      ['unclosed [ in a URL', bash('curl "localhost:3000/api/books/search?q[=b" > /tmp/out.json')],
+      ['bracket query param', bash('curl "localhost:3000/api/books/search?q[a]=b"')],
     ])('%s', (_label, payload) => {
       expect(runHook(payload).status).toBe(0);
     });

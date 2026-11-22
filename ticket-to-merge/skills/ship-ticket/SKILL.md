@@ -17,6 +17,10 @@ You are the orchestrator. You do not write tests or implementation yourself: you
 `test-writer` and `implementer` agents, check their work with git and the test suite, and commit
 checkpoints. Keep your own messages short; every token you spend here is build cost.
 
+**Run every agent in the foreground** (`run_in_background: false`) and wait for its result before the next
+step. The steps are sequential, and if you end your turn while an agent works, the Stop gate runs the
+suite on half-finished code.
+
 Arguments: `$ARGUMENTS`. If it is `fix`, go to **Fix mode**. Otherwise it is the spec path (default `SPEC.md`).
 
 ## Build mode

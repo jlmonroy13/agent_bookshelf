@@ -58,7 +58,7 @@ const NAME_PATTERNS = [
 const WRITES = /(>|\btee\b|\bwrite|\bappend|\bcp\b|\bmv\b|\brm\b|\bdd\b|\binstall\b|\btouch\b|\bln\b|\btruncate\b|\bshred\b|\bunlink|-delete\b|\bsed\b|\bperl\b|\bopen\s*\(|\bsqlite3\b)/i;
 const DYNAMIC = /(\$\(|`|\beval\b|%s|\.join\s*\(|\bconcat\b)/i;
 const BARE_FRAGMENT = /(^|["'\s,(+])(env|seed|schema|sql|bookshelf|db|package)(["'\s,)+]|$)/i;
-const OBFUSCATED = /(fromCharCode|\bchr\s*\(|\bbase64\b|\batob\b|Buffer\.from|\\x[0-9a-f]{2}|\\u00[0-9a-f]{2}|\\[0-7]{3}|\bxxd\b|\brot13\b|\brev\b|\[::-1\])/i;
+const OBFUSCATED = /(fromCharCode|\bchr\s*\(|\bbase64\b|\batob\b|Buffer\.from|\\x[0-9a-f]{2}|\\u00[0-9a-f]{2}|\\[0-7]{3}|\bxxd\b|\brot13\b|(?:^|[|;&]\s*)rev(?:\s|$)|\[::-1\])/i;
 const PATCH_TOOLS = /\b(git\s+apply|git\s+am|patch)\b/i;
 const ADD_DEPENDENCY = /\b(npm\s+(i|install|add)\s+(?:-\S+\s+)*[^\s;&|-]|npm\s+(uninstall|remove|rm|update|up)\b|yarn\s+add\b|pnpm\s+(add|install\s+[^\s-])|bun\s+add\b|npx\s+[^\s]+\s+.*--save)/i;
 const SCRIPT_EXT = /\.(m?js|cjs|ts|py|sh|bash|zsh|rb|pl)$/i;
@@ -109,7 +109,12 @@ const squash = (s) => s.replace(/["'`\\+\s]/g, '');
 
 function globToRegex(glob) {
   const body = glob.replace(/[.+^${}()|\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.');
-  return new RegExp(`^${body}$`, 'i');
+  try {
+    return new RegExp(`^${body}$`, 'i');
+  } catch {
+    // Unbalanced [ or ] (e.g. a URL like ?q[=b): treat brackets as literal characters.
+    return new RegExp(`^${body.replace(/[[\]]/g, '\\$&')}$`, 'i');
+  }
 }
 
 function globOrParentHit(command, cwd) {
@@ -270,8 +275,13 @@ function main() {
   } catch {
     block('hook received invalid input');
   }
-  if (mode === 'post') post(input);
-  else pre(input);
+  try {
+    if (mode === 'post') post(input);
+    else pre(input);
+  } catch (err) {
+    // An unexpected bug must still fail closed, with a readable reason instead of a stack trace.
+    if (mode === 'pre') block(`hook error: ${err?.message ?? err}`);
+  }
   process.exit(0);
 }
 

@@ -40,10 +40,13 @@ if (blocks > MAX_BLOCKS) {
 }
 
 const output = `${run.stdout ?? ''}\n${run.stderr ?? ''}`;
-const interesting = output
-  .split('\n')
-  .filter((l) => /FAIL|✗|×|AssertionError|Error:|Expected|Received|expected|Tests\s+\d|Test Files/.test(l))
-  .slice(0, MAX_LINES);
+// Vitest prints each failure twice (summary list, then detail blocks). Keep only the summary list:
+// the failing test name (×) plus its one-line reason (→), and the totals. Deduplicate.
+const interesting = [
+  ...new Set(
+    output.split('\n').filter((l) => /^\s*(×|✗|→)|^\s*(Tests|Test Files)\s/.test(l)).map((l) => l.trimEnd())
+  ),
+].slice(0, MAX_LINES);
 
 console.error(
   `DONE-GATE (${blocks}/${MAX_BLOCKS}): npm run test:run is failing, the ticket is not done.\n` +
