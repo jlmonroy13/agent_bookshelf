@@ -46,7 +46,9 @@ Arguments: `$ARGUMENTS`. If it is `fix`, go to **Fix mode**. Otherwise it is the
 2. Verify, do not trust the report:
    - `git diff RED_SHA -- tests/` must be empty. If not, restore with `git checkout RED_SHA -- tests/` and send implementer back.
    - `npm run test:run` must be green.
-   - `git diff --stat RED_SHA` must not touch `src/db/schema.sql`, `src/db/seed.sql`, `package*.json`.
+   - `git diff --stat RED_SHA` (no path arguments) must list only source files: no schema, seed or package
+     files. Read the output; do not name those files in the command, because the guardrail blocks any
+     shell command that names a protected file.
 3. Commit: `git add -A src && git commit -m "feat(<ticket>): <summary>"`.
 
 ### 3. Hand off

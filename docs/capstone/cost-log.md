@@ -12,8 +12,9 @@ Cache hit = cache read ÷ (input + cache read + cache write).
 | Review planted-v1, runs 4–6 (Notes change, still Opus orchestrator) | $0.67 / $0.55 / $0.54, mean $0.59 | 92–94% | Opus $0.59 / $0.49 / $0.48 · Sonnet $0.078 / $0.057 / $0.057 | `--model sonnet` on the CLI did not take effect; lever moved into the skill frontmatter (`model: sonnet`, commit 6210d49) |
 | Review planted-v1, runs 7–9 — **lever attempt 1**: `model: sonnet` in review-pr frontmatter, Opus session | $0.68 / $0.58 / $0.65, mean **$0.64 (+8%)** | 87–88%, 1 cache miss per run ("model changed, ~26k tokens re-cached") | Opus $0.44 / $0.37 / $0.44 · Sonnet $0.24 / $0.21 / $0.21 | Quality held (recall/precision 100%), cost rose: the mid-session model switch throws away the prompt cache (per-model) and Opus still handles invocation and wrap-up. Reverted. |
 | Review planted-v1, runs 10–12 — **lever attempt 2 (kept)**: whole session on Sonnet (`/model sonnet` before the run) | $0.2633 / $0.2609 / $0.2587, mean **$0.26 (−56%)** | 88% / 91% / 90%, no misses | Sonnet 5.5 only (orchestrator + reviewers) · Haiku $0.0003 | Quality held: recall 4/4 and precision 4/4 in all 3 runs; 34–37 s per run vs 53–83 s |
-| Fix loop (`/ship-ticket fix`) | | | | |
-| **Total, one ticket** | | | | |
+| Fix loop (`/ship-ticket fix` on planted-v1 findings, Sonnet session) | $0.35 | 92% | Sonnet 5.5 only (orchestrator + test-writer + implementer) · Haiku $0.0003 | 58 s API · 4/4 findings fixed, 0 rejected · regression tests F1–F4 red at 79a0b51, fix c125190, 53/53 green · done-gate fired once mid-run (agents backgrounded) |
+| **Total, one ticket as run** (build Opus + review Sonnet + fix Sonnet) | **$1.44** | | | $0.83 + $0.26 + $0.35 |
+| Total with the review before the lever | $1.77 | | | $0.83 + $0.59 + $0.35 |
 
 Raw build usage: Opus 126 in / 4.1k out / 594.4k cache read / 56.1k cache write · Sonnet 14 in / 8.2k out / 61.7k cache read / 35.6k cache write · Haiku 2.2k in / 509 out.
 
