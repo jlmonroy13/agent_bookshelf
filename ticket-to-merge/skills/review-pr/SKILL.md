@@ -13,7 +13,8 @@ Precision matters as much as recall: every finding you return must be real.
 
 1. Base = `$ARGUMENTS` if given, else `main` (fall back to `origin/main`). `BASE=$(git merge-base <base> HEAD)`.
 2. `git diff $BASE...HEAD --stat` and `git diff $BASE...HEAD -U5` (plus uncommitted changes: `git diff -U5`).
-   Skip lockfiles, `dist/`, and binary files.
+   Ignore lockfiles, `dist/` and binary files when you read the diff, but do not name protected files
+   (`package*.json`, `*.sql`, `bookshelf.db`, `.env`) in shell commands: the guardrail blocks any command that does.
 3. Spec, first that exists:
    - `SPEC.md` in the repo root;
    - a spec in the `specs/` folder next to this SKILL.md whose interface matches the diff

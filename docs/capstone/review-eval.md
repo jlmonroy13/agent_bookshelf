@@ -63,6 +63,18 @@ are Opus-orchestrator runs.)
 Quality held; cost went up 8% (mean $0.64 vs $0.59) because the skill switches model mid-session and the
 prompt cache is per model. Reverted.
 
+## Lever attempt 2 (kept): whole session on Sonnet (runs 10–12)
+
+| Run | Findings | Recall | Precision | Cost |
+|-----|----------|--------|-----------|------|
+| 10 | 4 | 100% | 100% | $0.2633 |
+| 11 | 4 | 100% | 100% | $0.2609 |
+| 12 | 4 | 100% | 100% | $0.2587 |
+| **Mean** | 4 | **100%** | **100%** | **$0.26** (−56% vs $0.59) |
+
+Same 4 bugs, no decoy flagged, test gap still reported under Notes. Severity of B1/B2 varied between
+medium and high across runs (does not affect recall or precision).
+
 ## Issue found during the runs (fixed)
 
 Run 2 hit a false alarm from the guardrail's post-Bash integrity check: a command that `cd`-ed into

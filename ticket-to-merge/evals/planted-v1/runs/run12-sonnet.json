@@ -1,0 +1,6 @@
+[
+  {"file":"src/models/book.ts","line":31,"severity":"high","issue":"Author is matched with case-sensitive instr(author, ?) instead of LIKE ? ESCAPE on both columns, so AC2/AC3 fail for authors.","evidence":"q=fowler does not match author 'Martin Fowler'; q=FOWLER vs q=Fowler return different lists."},
+  {"file":"src/models/book.ts","line":27,"severity":"high","issue":"Underscore is not escaped, so it acts as a LIKE wildcard on title (AC8).","evidence":"Only \\ and % are replaced; q=_ becomes pattern %_% and matches every title instead of returning []."},
+  {"file":"src/routes/api.ts","line":19,"severity":"high","issue":"Off-by-one in length check: exactly 100 chars after trim is rejected, but AC6 requires 200 for 100 and 400 only for 101+.","evidence":"`if (q.length >= MAX_QUERY_LENGTH)` with MAX_QUERY_LENGTH = 100 returns 400 for 'a'.repeat(100)."},
+  {"file":"src/routes/api.ts","line":18,"severity":"high","issue":"No single-string validation: repeated or non-string q is coerced by String() instead of returning 400 { error: 'Query must be a single string' }.","evidence":"?q=a&q=b becomes 'a,b' and returns 200 []; ?q[x]=1 becomes '[object Object]'."}
+]

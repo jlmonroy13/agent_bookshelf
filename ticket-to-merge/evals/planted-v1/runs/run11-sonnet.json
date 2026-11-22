@@ -1,0 +1,6 @@
+[
+{"file":"src/routes/api.ts","line":18,"severity":"high","issue":"Repeated or non-string q is coerced with String() instead of returning 400 { error: 'Query must be a single string' } (spec interface).","evidence":"`String(req.query.q ?? '').trim()` -> ?q=a&q=b becomes 'a,b' and returns 200; ?q[x]=1 becomes '[object Object]'."},
+{"file":"src/routes/api.ts","line":19,"severity":"high","issue":"Off-by-one on length limit: a trimmed query of exactly 100 characters is rejected, but the spec (AC6) allows 100 and rejects only 101+.","evidence":"`if (q.length >= MAX_QUERY_LENGTH)` with MAX_QUERY_LENGTH = 100 -> a 100-char q returns 400 instead of 200."},
+{"file":"src/models/book.ts","line":27,"severity":"high","issue":"`_` is not escaped, so it remains a LIKE wildcard in the title match (AC8).","evidence":"escape only replaces `\\` and `%`; q=_ matches every title, q=C_ean matches 'Clean Code'."},
+{"file":"src/models/book.ts","line":31,"severity":"high","issue":"Author match uses instr(), which is case-sensitive, breaking case-insensitivity (AC3) for authors.","evidence":"`OR instr(author, ?) > 0` with the raw query -> q=fowler does not match author 'Martin Fowler'."}
+]
