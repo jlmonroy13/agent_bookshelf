@@ -35,6 +35,23 @@ Brief points: recall 6.0/6 · precision 3.2/4 (strict) to 4.0/4.
 - Each run, both reviewers reported overlapping issues (9–10 raw findings); the orchestrator's verify-and-merge step collapsed them to 5 with no false drops.
 - Earlier, on the clean BOOK-101 diff, /review-pr returned `[]` (no false positives).
 
+## Change: test-coverage gaps become Notes (commit 23588a1)
+
+Runs 1–3 always added "tests don't cover AC2/AC6/AC8…": true, but not a defect with a triggering input, so
+a grader matching findings to planted bugs would count it false. review-correctness now tags plain coverage
+gaps as notes and /review-pr prints them under `Notes (not findings):` instead of the JSON.
+
+| Run | Findings | Recall | Precision | Missed | Cost (/usage) |
+|-----|----------|--------|-----------|--------|---------------|
+| 4 | 4 | 4/4 = 100% | 4/4 = 100% | – | $0.67 |
+| 5 | 4 | 4/4 = 100% | 4/4 = 100% | – | $0.55 |
+| 6 | 4 | 4/4 = 100% | 4/4 = 100% | – | $0.54 |
+| **Mean** | 4 | **100%** | **100%** | | **$0.59** |
+
+Brief points: recall 6.0/6 · precision 4.0/4. The coverage gap still appears, under Notes, in every run.
+(The session was started with `--model sonnet`, but /usage shows the orchestrator still ran on Opus, so these
+are Opus-orchestrator runs.)
+
 ## Issue found during the runs (fixed)
 
 Run 2 hit a false alarm from the guardrail's post-Bash integrity check: a command that `cd`-ed into
