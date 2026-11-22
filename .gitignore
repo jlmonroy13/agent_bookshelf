@@ -151,3 +151,6 @@ vite.config.ts.timestamp-*
 *.sqlite3
 
 evals/results/
+
+# ticket-to-merge review output
+.ticket-to-merge/

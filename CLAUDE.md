@@ -39,6 +39,14 @@ npm start            # run compiled dist/server.js
 
 There is no `books.read` column. “Read” means the book is on the user’s shelf named **`read`** (see seed data). Implement via `Shelf.markBookAsRead` and `POST /api/books/:id/read` with body `{ "userId": number }`.
 
+## Current ticket: BOOK-101 search
+
+Spec and acceptance criteria live in `SPEC.md` (`GET /api/books/search?q=`). Built with the
+`ticket-to-merge` plugin (`claude --plugin-dir ./ticket-to-merge`): `/ticket-to-merge:ship-ticket`
+builds test-first, `/ticket-to-merge:review-pr` reviews. Its hook blocks `.env`, `bookshelf.db`,
+`src/db/seed.sql`, `src/db/schema.sql`, `package*.json` and `npm install <pkg>`; read the SQL files
+with the Read tool, not Bash. Tests are frozen once the RED commit exists.
+
 ## Error shape (JSON API)
 
 ```json

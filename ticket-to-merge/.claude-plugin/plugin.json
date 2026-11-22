@@ -1,0 +1,6 @@
+{
+  "name": "ticket-to-merge",
+  "version": "0.1.0",
+  "description": "Ship a ticket test-first with builder agents (/ship-ticket) and audit a diff with read-only reviewer agents (/review-pr). Guardrail hook protects .env, the database, seed/schema SQL and dependencies.",
+  "author": { "name": "Jorge Monroy" }
+}
