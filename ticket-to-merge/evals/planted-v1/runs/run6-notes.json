@@ -1,0 +1,6 @@
+[
+  {"file": "src/models/book.ts", "line": 31, "severity": "high", "issue": "Author is matched with instr(author, ?), which is case-sensitive and not the spec's LIKE ? ESCAPE '\\' on both columns, so AC2/AC3 fail for authors.", "evidence": "q=fowler -> instr('Martin Fowler', 'fowler') = 0, and title 'Refactoring' doesn't contain it, so the result is [] (expected to include Refactoring)."},
+  {"file": "src/models/book.ts", "line": 27, "severity": "high", "issue": "'_' is not escaped (only '\\' and '%'), so it acts as a LIKE single-char wildcard on title, breaking AC8.", "evidence": "q=_ -> pattern '%_%' matches every non-empty title, so all books come back (expected [])."},
+  {"file": "src/routes/api.ts", "line": 19, "severity": "high", "issue": "Off-by-one: `q.length >= MAX_QUERY_LENGTH` rejects a 100-char query, but AC6 allows 100 and rejects only 101+.", "evidence": "q='a'.repeat(100) -> 400 'Query must be 100 characters or fewer' (expected 200)."},
+  {"file": "src/routes/api.ts", "line": 18, "severity": "high", "issue": "No single-string check: String(req.query.q ?? '') coerces arrays and objects instead of returning 400 'Query must be a single string'.", "evidence": "?q=a&q=b -> q='a,b' -> 200 search; ?q[x]=1 -> '[object Object]' -> 200 (expected 400 { error: 'Query must be a single string' })."}
+]
