@@ -1,0 +1,62 @@
+{
+  "branch": "evals/planted-v1",
+  "base": "main",
+  "commit": "c3fc088",
+  "how_to_recreate": "git worktree add ../agent_bookshelf-plants -b evals/planted-v1 main && cd ../agent_bookshelf-plants && git apply <path>/ticket-to-merge/evals/planted-v1/planted.patch && git commit -am 'Add book search endpoint'",
+  "bugs": [
+    {
+      "id": "B1",
+      "file": "src/models/book.ts",
+      "lines": [26, 32],
+      "match": "underscore|\\b_\\b|'_'|`_`|wildcard",
+      "what": "LIKE escape handles \\ and % but not _, so q=_ matches every book",
+      "proof": "GET /api/books/search?q=_ -> 200 with all 50 books (expected [])"
+    },
+    {
+      "id": "B2",
+      "file": "src/models/book.ts",
+      "lines": [29, 33],
+      "match": "case|instr|lower|upper",
+      "what": "author is matched with instr(), which is case-sensitive",
+      "proof": "q=fowler -> [] while q=Fowler -> [Refactoring]"
+    },
+    {
+      "id": "B3",
+      "file": "src/routes/api.ts",
+      "lines": [16, 19],
+      "match": "array|repeated|multiple|more than once|twice|String\\(|not a string|single string|type",
+      "what": "String(req.query.q) coerces ?q=a&q=b to 'a,b' instead of returning 400",
+      "proof": "q=a&q=b -> 200 [] (expected 400 { error })"
+    },
+    {
+      "id": "B4",
+      "file": "src/routes/api.ts",
+      "lines": [18, 21],
+      "match": "off.by.one|>=|exactly 100|100 char|boundary|equal",
+      "what": "length check uses >= so a 100-character query is rejected",
+      "proof": "q=<100 x a> -> 400 (expected 200)"
+    }
+  ],
+  "decoys": [
+    {
+      "id": "C1",
+      "file": "src/models/book.ts",
+      "what": "SQL built with a template literal, but the only interpolated value is the constant BOOK_COLUMNS; user input still goes through ? placeholders. Flagging this as injection is a false positive."
+    },
+    {
+      "id": "C2",
+      "file": "src/routes/api.ts",
+      "what": "Empty or whitespace query short-circuits to getAllBooks(): correct per AC4."
+    },
+    {
+      "id": "C3",
+      "file": "src/routes/api.ts",
+      "what": "/books/search is registered before /books/:id: correct order."
+    },
+    {
+      "id": "C4",
+      "file": "tests/routes/search.test.ts",
+      "what": "Four tests that pass and are correct (they just do not cover the planted bugs)."
+    }
+  ]
+}

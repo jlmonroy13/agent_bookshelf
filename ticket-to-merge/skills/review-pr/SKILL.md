@@ -15,7 +15,12 @@ Precision matters as much as recall: every finding you return must be real.
 1. Base = `$ARGUMENTS` if given, else `main` (fall back to `origin/main`). `BASE=$(git merge-base <base> HEAD)`.
 2. `git diff $BASE...HEAD --stat` and `git diff $BASE...HEAD -U5` (plus uncommitted changes: `git diff -U5`).
    Skip lockfiles, `dist/`, and binary files.
-3. Spec: if `SPEC.md` exists, read it; otherwise read `CLAUDE.md` and use the repo conventions as the spec.
+3. Spec, first that exists:
+   - `SPEC.md` in the repo root;
+   - a spec in the `specs/` folder next to this SKILL.md whose interface matches the diff
+     (e.g. `specs/BOOK-101.md` when the diff adds `/books/search`);
+   - otherwise `CLAUDE.md`, using the repo conventions as the spec.
+   Always also read `CLAUDE.md` for conventions (status codes, error shape, where code lives).
 4. If the diff is empty, print `[]` and stop.
 
 ## 2. Dispatch reviewers in parallel (one message, two Agent calls)
@@ -37,7 +42,8 @@ Do not add findings of your own that no reviewer reported unless you can verify 
 
 ## 4. Output
 
-1. Write the verified array to `.ticket-to-merge/findings.json` (create the folder; it is git-ignored) so `/ship-ticket fix` can use it.
+1. Write the verified array to `.ticket-to-merge/findings.json` (create the folder) so `/ship-ticket fix`
+   can use it, and a copy to `.ticket-to-merge/findings-<YYYYMMDD-HHMMSS>.json` so repeated runs can be scored.
 2. Print the JSON array in a ```json block, ordered high → low:
 
 ```json
