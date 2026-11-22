@@ -218,32 +218,49 @@ function fingerprint(cwd) {
   return out;
 }
 
+// Pre and post can see different cwds (a command that runs `cd sub && ...`), so both sides fingerprint
+// the same directory: the git top level found at pre time, saved inside the snapshot.
+function projectRoot(cwd) {
+  try {
+    return execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || cwd;
+  } catch {
+    return cwd;
+  }
+}
+
 function snapshotFile(input) {
-  const key = String(input.tool_use_id || input.session_id || 'default').replace(/[^\w-]/g, '');
-  return join(tmpdir(), `ticket-to-merge-${key}.json`);
+  // Keyed by tool_use_id only: a session-wide key could pair a post with an older, unrelated pre.
+  if (!input.tool_use_id) return null;
+  return join(tmpdir(), `ticket-to-merge-${String(input.tool_use_id).replace(/[^\w-]/g, '')}.json`);
 }
 
 function snapshot(input, cwd) {
+  const file = snapshotFile(input);
+  if (!file) return;
   try {
-    writeFileSync(snapshotFile(input), JSON.stringify(fingerprint(cwd)));
+    const root = projectRoot(cwd);
+    writeFileSync(file, JSON.stringify({ root, at: Date.now(), files: fingerprint(root) }));
   } catch {
     // A missing snapshot only disables layer 9 for this call; layers 1-8 already ran.
   }
 }
 
+const MAX_SNAPSHOT_AGE_MS = 30 * 60 * 1000;
+
 function post(input) {
   if (input.tool_name !== 'Bash') return;
-  const cwd = input.cwd || process.cwd();
   const file = snapshotFile(input);
-  if (!existsSync(file)) return;
-  let before;
+  if (!file || !existsSync(file)) return;
+  let snap;
   try {
-    before = JSON.parse(readFileSync(file, 'utf8'));
+    snap = JSON.parse(readFileSync(file, 'utf8'));
     unlinkSync(file);
   } catch {
     return;
   }
-  const after = fingerprint(cwd);
+  if (!snap?.root || !snap.files || Date.now() - snap.at > MAX_SNAPSHOT_AGE_MS) return;
+  const { root, files: before } = snap;
+  const after = fingerprint(root);
   const changed = Object.keys(before).filter((k) => before[k] !== after[k]);
   if (changed.length === 0) return;
 
@@ -251,10 +268,10 @@ function post(input) {
   for (const rel of changed) {
     if (rel === '.env') continue;
     try {
-      execFileSync('git', ['checkout', '--', rel], { cwd, stdio: 'ignore' });
+      execFileSync('git', ['checkout', '--', rel], { cwd: root, stdio: 'ignore' });
       restored.push(rel);
     } catch {
-      // Not a git repo or file untracked: report only.
+      // Untracked file or not a git repo: report only.
     }
   }
   console.error(

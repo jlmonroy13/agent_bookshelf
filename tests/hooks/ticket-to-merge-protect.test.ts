@@ -166,6 +166,25 @@ describe('ticket-to-merge protect hook', () => {
       expect(readFileSync(join(repo, 'src', 'db', 'seed.sql'), 'utf8')).toBe('ORIGINAL');
     });
 
+    // Regression from the planted-bug review runs: false alarm when the command cd'd into a subfolder.
+    it('stays quiet when the command cd-ed into a subfolder (pre and post cwd differ)', () => {
+      mkdirSync(join(repo, 'out'), { recursive: true });
+      runHook({ ...bash('cd out && ls'), cwd: repo, tool_use_id: 'toolu_cd' }, 'pre');
+      expect(runHook({ ...bash('cd out && ls'), cwd: join(repo, 'out'), tool_use_id: 'toolu_cd' }, 'post').status).toBe(0);
+    });
+
+    it('skips the check without a tool_use_id instead of comparing against a stale snapshot', () => {
+      runHook({ ...bash('ls'), cwd: join(repo, 'out'), session_id: 's2' }, 'pre');
+      expect(runHook({ ...bash('git status'), cwd: repo, session_id: 's2' }, 'post').status).toBe(0);
+    });
+
+    it('still catches a real change made from a subfolder', () => {
+      runHook({ ...bash('x'), cwd: join(repo, 'out'), tool_use_id: 'toolu_sub' }, 'pre');
+      writeFileSync(join(repo, 'src', 'db', 'seed.sql'), 'TAMPERED');
+      expect(runHook({ ...bash('x'), cwd: join(repo, 'out'), tool_use_id: 'toolu_sub' }, 'post').status).toBe(2);
+      expect(readFileSync(join(repo, 'src', 'db', 'seed.sql'), 'utf8')).toBe('ORIGINAL');
+    });
+
     it('stays quiet when nothing protected changed', () => {
       const ids = { cwd: repo, session_id: 's1', tool_use_id: 'toolu_clean' };
       runHook({ ...bash('ls'), ...ids }, 'pre');
